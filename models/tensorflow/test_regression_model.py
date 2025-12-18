@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from tensorflow import keras
 import joblib
 import os
@@ -34,13 +33,8 @@ def get_feature_names():
 def create_sample_input():
     feature_names = get_feature_names()
 
-    sample = {}
-
-    sample['BMI'] = 24.22
-    sample['Alcohol_Consumption'] = 0.0
-    sample['Fruit_Consumption'] = 16.0
-    sample['Green_Vegetables_Consumption'] = 8.0
-    sample['FriedPotato_Consumption'] = 4.0
+    sample = {'BMI': 24.22, 'Alcohol_Consumption': 0.0, 'Fruit_Consumption': 16.0, 'Green_Vegetables_Consumption': 8.0,
+              'FriedPotato_Consumption': 4.0}
 
     for feature in feature_names:
         if feature not in sample:
@@ -161,10 +155,15 @@ def interactive_mode():
             print("\n--- Continuous Features ---")
             try:
                 bmi = float(input(f"BMI [default: {sample['BMI']:.2f}]: ") or sample['BMI'])
-                alcohol = float(input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ") or sample['Alcohol_Consumption'])
-                fruit = float(input(f"Fruit Consumption [default: {sample['Fruit_Consumption']:.1f}]: ") or sample['Fruit_Consumption'])
-                veggies = float(input(f"Green Vegetables Consumption [default: {sample['Green_Vegetables_Consumption']:.1f}]: ") or sample['Green_Vegetables_Consumption'])
-                potatoes = float(input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ") or sample['FriedPotato_Consumption'])
+                alcohol = float(input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ")
+                                or sample['Alcohol_Consumption'])
+                fruit = float(input(f"Fruit Consumption [default: {sample['Fruit_Consumption']:.1f}]: ")
+                              or sample['Fruit_Consumption'])
+                veggies = float(input(f"Green Vegetables Consumption [default: "
+                                      f"{sample['Green_Vegetables_Consumption']:.1f}]: ")
+                                or sample['Green_Vegetables_Consumption'])
+                potatoes = float(input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ")
+                                 or sample['FriedPotato_Consumption'])
 
                 sample['BMI'] = bmi
                 sample['Alcohol_Consumption'] = alcohol

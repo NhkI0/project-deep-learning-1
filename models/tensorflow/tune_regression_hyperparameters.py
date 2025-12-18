@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from tensorflow import keras
 import keras_tuner as kt
 from sklearn.model_selection import train_test_split
@@ -280,6 +279,7 @@ def main():
     print("  - multioutput_regression_height_weight.py")
 
     return tuner, best_model, results
+
 
 if __name__ == "__main__":
     main()

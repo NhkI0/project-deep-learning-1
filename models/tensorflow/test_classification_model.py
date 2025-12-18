@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from tensorflow import keras
 import joblib
 import os
@@ -109,6 +108,7 @@ def explain_prediction(prediction_proba, prediction_class, threshold=0.5):
     print(f"  - Standard threshold (0.5): {'POSITIVE' if prediction_proba >= 0.5 else 'NEGATIVE'}")
     print(f"  - Screening threshold ({threshold:.3f}): {'POSITIVE' if prediction_proba >= threshold else 'NEGATIVE'}")
 
+
 def interactive_mode():
     print("\n" + "="*60)
     print("INTERACTIVE TESTING MODE - Heart Disease Prediction")
@@ -152,10 +152,15 @@ def interactive_mode():
                 height = float(input(f"Height (cm) [default: {sample['Height_(cm)']:.1f}]: ") or sample['Height_(cm)'])
                 weight = float(input(f"Weight (kg) [default: {sample['Weight_(kg)']:.1f}]: ") or sample['Weight_(kg)'])
                 bmi = float(input(f"BMI [default: {sample['BMI']:.2f}]: ") or sample['BMI'])
-                alcohol = float(input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ") or sample['Alcohol_Consumption'])
-                fruit = float(input(f"Fruit Consumption [default: {sample['Fruit_Consumption']:.1f}]: ") or sample['Fruit_Consumption'])
-                veggies = float(input(f"Green Vegetables Consumption [default: {sample['Green_Vegetables_Consumption']:.1f}]: ") or sample['Green_Vegetables_Consumption'])
-                potatoes = float(input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ") or sample['FriedPotato_Consumption'])
+                alcohol = float(input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ")
+                                or sample['Alcohol_Consumption'])
+                fruit = float(input(f"Fruit Consumption [default: {sample['Fruit_Consumption']:.1f}]: ")
+                              or sample['Fruit_Consumption'])
+                veggies = float(input(f"Green Vegetables Consumption [default: "
+                                      f"{sample['Green_Vegetables_Consumption']:.1f}]: ")
+                                or sample['Green_Vegetables_Consumption'])
+                potatoes = float(input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ")
+                                 or sample['FriedPotato_Consumption'])
 
                 sample['Height_(cm)'] = height
                 sample['Weight_(kg)'] = weight

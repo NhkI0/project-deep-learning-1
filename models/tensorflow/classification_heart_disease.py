@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, roc_auc_score, recall_score, precision_score
+from sklearn.metrics import (classification_report, confusion_matrix, accuracy_score,
+                             roc_auc_score, recall_score, precision_score)
 from imblearn.over_sampling import SMOTE
 import os
 
@@ -203,7 +203,8 @@ def main():
     smote = SMOTE(sampling_strategy=0.8, random_state=42)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
 
-    print(f"After SMOTE - Training: {X_train_resampled.shape}, Positive: {y_train_resampled.sum()} ({y_train_resampled.mean()*100:.1f}%)")
+    print(f"After SMOTE - Training: {X_train_resampled.shape}, "
+          f"Positive: {y_train_resampled.sum()} ({y_train_resampled.mean()*100:.1f}%)")
     print(f"⚠️  Validation and test sets remain untouched (no SMOTE)")
 
     print(f"\nFinal dataset sizes:")

@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from tensorflow import keras
 import joblib
 import os
@@ -32,27 +31,27 @@ def engineer_features(data):
     smoking_mapping = {'Yes': -1, 'No': 0}
 
     data['Lifestyle_Score'] = (
-        data['Exercise'].replace(exercise_mapping)
-        - data['Smoking_History'].replace(smoking_mapping)
-        + data['Fruit_Consumption']/10
-        + data['Green_Vegetables_Consumption']/10
-        - data['Alcohol_Consumption']/10
+            data['Exercise'].replace(exercise_mapping)
+            - data['Smoking_History'].replace(smoking_mapping)
+            + data['Fruit_Consumption'] / 10
+            + data['Green_Vegetables_Consumption'] / 10
+            - data['Alcohol_Consumption'] / 10
     )
 
     # 4. Healthy Diet Score
     data['Healthy_Diet_Score'] = (
-        data['Fruit_Consumption']/10
-        + data['Green_Vegetables_Consumption']/10
-        - data['FriedPotato_Consumption']/10
+            data['Fruit_Consumption'] / 10
+            + data['Green_Vegetables_Consumption'] / 10
+            - data['FriedPotato_Consumption'] / 10
     )
 
     # 5. Interaction Terms
     data['Smoking_Alcohol'] = (
-        data['Smoking_History'].replace(smoking_mapping) * data['Alcohol_Consumption']
+            data['Smoking_History'].replace(smoking_mapping) * data['Alcohol_Consumption']
     )
 
     data['Checkup_Exercise'] = (
-        data['Checkup_Frequency'] * data['Exercise'].replace(exercise_mapping)
+            data['Checkup_Frequency'] * data['Exercise'].replace(exercise_mapping)
     )
 
     # 6. Height to Weight Ratio
@@ -60,17 +59,17 @@ def engineer_features(data):
 
     # 7. Fruit and Vegetables Interaction
     data['Fruit_Vegetables'] = (
-        data['Fruit_Consumption'] * data['Green_Vegetables_Consumption']
+            data['Fruit_Consumption'] * data['Green_Vegetables_Consumption']
     )
 
     # 8. Healthy Diet × Lifestyle Interaction
     data['HealthyDiet_Lifestyle'] = (
-        data['Healthy_Diet_Score'] * data['Lifestyle_Score']
+            data['Healthy_Diet_Score'] * data['Lifestyle_Score']
     )
 
     # 9. Alcohol × Fried Potato Interaction
     data['Alcohol_FriedPotato'] = (
-        data['Alcohol_Consumption'] * data['FriedPotato_Consumption']
+            data['Alcohol_Consumption'] * data['FriedPotato_Consumption']
     )
 
     return data
@@ -250,17 +249,17 @@ def predict_from_dict(model, scaler, input_dict, threshold=0.5):
 
 def explain_prediction(prediction_proba, prediction_class, threshold=0.5):
     """Explain prediction with threshold information."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PREDICTION RESULT (XGBoost Features Model)")
-    print("="*60)
+    print("=" * 60)
 
-    print(f"\nPrediction Probability: {prediction_proba:.4f} ({prediction_proba*100:.2f}%)")
+    print(f"\nPrediction Probability: {prediction_proba:.4f} ({prediction_proba * 100:.2f}%)")
     print(f"Decision Threshold: {threshold:.3f} (calibrated for 85% recall)")
     print(f"Predicted Class: {prediction_class} ({'Heart Disease' if prediction_class == 1 else 'No Heart Disease'})")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("INTERPRETATION")
-    print("-"*60)
+    print("-" * 60)
 
     if prediction_proba >= 0.7:
         confidence = "HIGH"
@@ -278,9 +277,9 @@ def explain_prediction(prediction_proba, prediction_class, threshold=0.5):
     print(f"Risk Level: {confidence}")
     print(f"{interpretation}")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("MODEL FEATURES")
-    print("-"*60)
+    print("-" * 60)
     print("This model uses 47+ features including:")
     print("  - Original features (height, weight, BMI, etc.)")
     print("  - Engineered features (lifestyle scores, interactions)")
@@ -290,9 +289,9 @@ def explain_prediction(prediction_proba, prediction_class, threshold=0.5):
 
 def interactive_mode():
     """Interactive mode for testing multiple inputs."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("INTERACTIVE TESTING - XGBoost Features Model")
-    print("="*60)
+    print("=" * 60)
 
     print("\nLoading model, scaler, and optimal threshold...")
     model, scaler, optimal_threshold = load_model_and_scaler()
@@ -302,12 +301,12 @@ def interactive_mode():
     print(f"✓ Features: 47+ (with engineered features)")
 
     while True:
-        print("\n" + "-"*60)
+        print("\n" + "-" * 60)
         print("OPTIONS:")
         print("  1. Test with sample input")
         print("  2. Test with custom input")
         print("  3. Exit")
-        print("-"*60)
+        print("-" * 60)
 
         choice = input("\nEnter your choice (1-3): ").strip()
 
@@ -328,8 +327,10 @@ def interactive_mode():
             try:
                 # Basic features
                 print("\n--- Basic Information ---")
-                sample['General_Health'] = input(f"General Health (Poor/Fair/Good/Very Good/Excellent) [default: {sample['General_Health']}]: ").strip() or sample['General_Health']
-                sample['Age_Category'] = input(f"Age Category (18-24, 25-29, ..., 80+) [default: {sample['Age_Category']}]: ").strip() or sample['Age_Category']
+                sample['General_Health'] = input(f"General Health (Poor/Fair/Good/Very Good/Excellent) [default: "
+                                                 f"{sample['General_Health']}]: ").strip() or sample['General_Health']
+                sample['Age_Category'] = input(f"Age Category (18-24, 25-29, ..., 80+) [default: "
+                                               f"{sample['Age_Category']}]: ").strip() or sample['Age_Category']
                 sample['Sex'] = input(f"Sex (Male/Female) [default: {sample['Sex']}]: ").strip() or sample['Sex']
 
                 # Physical measurements
@@ -348,8 +349,11 @@ def interactive_mode():
 
                 # Lifestyle factors
                 print("\n--- Lifestyle Factors ---")
-                sample['Exercise'] = input(f"Exercise (Yes/No) [default: {sample['Exercise']}]: ").strip() or sample['Exercise']
-                sample['Smoking_History'] = input(f"Smoking History (Yes/No) [default: {sample['Smoking_History']}]: ").strip() or sample['Smoking_History']
+                sample['Exercise'] = (input(f"Exercise (Yes/No) [default: {sample['Exercise']}]: ").strip()
+                                      or sample['Exercise'])
+                sample['Smoking_History'] = (input(f"Smoking History (Yes/No) [default: "
+                                                   f"{sample['Smoking_History']}]: ").strip()
+                                             or sample['Smoking_History'])
 
                 alcohol = input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ").strip()
                 if alcohol:
@@ -359,11 +363,13 @@ def interactive_mode():
                 if fruit:
                     sample['Fruit_Consumption'] = float(fruit)
 
-                veggies = input(f"Green Vegetables Consumption [default: {sample['Green_Vegetables_Consumption']:.1f}]: ").strip()
+                veggies = input(f"Green Vegetables Consumption [default: "
+                                f"{sample['Green_Vegetables_Consumption']:.1f}]: ").strip()
                 if veggies:
                     sample['Green_Vegetables_Consumption'] = float(veggies)
 
-                potatoes = input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ").strip()
+                potatoes = input(f"Fried Potato Consumption [default: "
+                                 f"{sample['FriedPotato_Consumption']:.1f}]: ").strip()
                 if potatoes:
                     sample['FriedPotato_Consumption'] = float(potatoes)
 
@@ -405,9 +411,9 @@ def print_input_summary(input_dict):
 
 def test_with_custom_dict():
     """Example: Test with a custom dictionary."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("EXAMPLE: Testing with custom dictionary")
-    print("="*60)
+    print("=" * 60)
 
     model, scaler, optimal_threshold = load_model_and_scaler()
 
@@ -443,9 +449,9 @@ def test_with_custom_dict():
 
 
 if __name__ == "__main__":
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("HEART DISEASE PREDICTION - XGBoost Features Model")
-    print("="*60)
+    print("=" * 60)
     print("\nThis model uses extensive feature engineering:")
     print("  - BMI categories, lifestyle scores")
     print("  - Interaction terms (smoking×alcohol, diet×exercise)")

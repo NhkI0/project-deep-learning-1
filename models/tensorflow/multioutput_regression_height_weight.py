@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -169,7 +168,6 @@ def main():
     scaler_y = StandardScaler()
     y_train = scaler_y.fit_transform(y_train)
     y_val = scaler_y.transform(y_val)
-    y_test_scaled = scaler_y.transform(y_test)
 
     print(f"\nTraining set: {X_train.shape}")
     print(f"Validation set: {X_val.shape}")
