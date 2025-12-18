@@ -1,0 +1,14 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+imbalanced-learn
+torch
+scipy
+requests
+tqdm
+pillow
+PyYAML
+sympy
+streamlit
