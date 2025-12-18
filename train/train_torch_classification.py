@@ -156,3 +156,9 @@ precision = tp / (tp + fp)
 print("-" * 40)
 print(f"RECALL : {recall * 100:.2f}%")
 print(f"PRÉCISION FINAL            : {precision * 100:.2f}%")
+
+if not os.path.exists("models/pytorch/saved_models"):
+    os.makedirs("models/pytorch/saved_models")
+
+torch.save(model.state_dict(), "models/pytorch/saved_models/heart_disease.pth")
+print("Modèle sauvegardé dans models/pytorch/saved_models")
