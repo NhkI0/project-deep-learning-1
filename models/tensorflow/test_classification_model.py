@@ -7,8 +7,10 @@ import os
 
 
 def load_model_and_scaler():
+    """Load model, scaler, and optimal threshold."""
     model_path = 'saved_models/heart_disease_classification.keras'
     scaler_path = 'saved_models/heart_disease_scaler.pkl'
+    threshold_path = 'saved_models/optimal_threshold.txt'
 
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model not found at {model_path}. Please train the model first.")
@@ -18,7 +20,15 @@ def load_model_and_scaler():
     model = keras.models.load_model(model_path)
     scaler = joblib.load(scaler_path)
 
-    return model, scaler
+    # Load optimal threshold (calibrated for 85% recall)
+    if os.path.exists(threshold_path):
+        with open(threshold_path, 'r') as f:
+            optimal_threshold = float(f.read().strip())
+    else:
+        print("⚠️  Warning: Optimal threshold not found. Using default 0.5")
+        optimal_threshold = 0.5
+
+    return model, scaler, optimal_threshold
 
 
 def get_feature_names():
@@ -47,32 +57,71 @@ def create_sample_input():
     return sample
 
 
-def predict_from_dict(model, scaler, input_dict, feature_names):
+def predict_from_dict(model, scaler, input_dict, feature_names, threshold=0.5):
+    """Make prediction using specified threshold."""
     input_array = np.array([[input_dict[feature] for feature in feature_names]])
 
     input_scaled = scaler.transform(input_array)
 
     prediction_proba = model.predict(input_scaled, verbose=0)[0][0]
-    prediction_class = int(prediction_proba > 0.5)
+    prediction_class = int(prediction_proba > threshold)
 
     return prediction_proba, prediction_class
 
 
-def explain_prediction(prediction_proba, prediction_class):
+def explain_prediction(prediction_proba, prediction_class, threshold=0.5):
+    """Explain prediction with threshold information."""
+    print("\n" + "="*60)
+    print("PREDICTION RESULT")
+    print("="*60)
+
     print(f"\nPrediction Probability: {prediction_proba:.4f} ({prediction_proba*100:.2f}%)")
+    print(f"Decision Threshold: {threshold:.3f} (calibrated for 85% recall)")
     print(f"Predicted Class: {prediction_class} ({'Heart Disease' if prediction_class == 1 else 'No Heart Disease'})")
+
+    print("\n" + "-"*60)
+    print("INTERPRETATION")
+    print("-"*60)
+
+    if prediction_proba >= 0.7:
+        confidence = "HIGH"
+        interpretation = "Strong indication of heart disease risk."
+    elif prediction_proba >= threshold:
+        confidence = "MEDIUM-HIGH"
+        interpretation = "Above screening threshold - medical evaluation recommended."
+    elif prediction_proba >= 0.3:
+        confidence = "MEDIUM"
+        interpretation = "Moderate risk - monitor and consider lifestyle changes."
+    else:
+        confidence = "LOW"
+        interpretation = "Low risk based on current features."
+
+    print(f"Risk Level: {confidence}")
+    print(f"{interpretation}")
+
+    print("\n" + "-"*60)
+    print("THRESHOLD EXPLANATION")
+    print("-"*60)
+    print(f"This model uses a threshold of {threshold:.3f} instead of 0.5")
+    print("Why? Medical screening prioritizes catching cases (high recall)")
+    print("over minimizing false alarms (high precision).")
+    print(f"\nWith probability {prediction_proba:.3f}:")
+    print(f"  - Standard threshold (0.5): {'POSITIVE' if prediction_proba >= 0.5 else 'NEGATIVE'}")
+    print(f"  - Screening threshold ({threshold:.3f}): {'POSITIVE' if prediction_proba >= threshold else 'NEGATIVE'}")
 
 def interactive_mode():
     print("\n" + "="*60)
     print("INTERACTIVE TESTING MODE - Heart Disease Prediction")
     print("="*60)
 
-    print("\nLoading model and scaler...")
-    model, scaler = load_model_and_scaler()
+    print("\nLoading model, scaler, and optimal threshold...")
+    model, scaler, optimal_threshold = load_model_and_scaler()
     feature_names = get_feature_names()
 
-    print(f"\nModel loaded successfully!")
-    print(f"Number of features: {len(feature_names)}")
+    print(f"\n✓ Model loaded successfully!")
+    print(f"✓ Number of features: {len(feature_names)}")
+    print(f"✓ Optimal threshold: {optimal_threshold:.3f} (calibrated for 85% recall)")
+    print(f"  (Medical screening mode: prioritizes catching cases over minimizing false positives)")
 
     while True:
         print("Options:")
@@ -90,9 +139,9 @@ def interactive_mode():
             print_input_summary(sample)
 
             prediction_proba, prediction_class = predict_from_dict(
-                model, scaler, sample, feature_names
+                model, scaler, sample, feature_names, threshold=optimal_threshold
             )
-            explain_prediction(prediction_proba, prediction_class)
+            explain_prediction(prediction_proba, prediction_class, threshold=optimal_threshold)
 
         elif choice == '2':
             sample = create_sample_input()
@@ -138,9 +187,9 @@ def interactive_mode():
             print_input_summary(sample)
 
             prediction_proba, prediction_class = predict_from_dict(
-                model, scaler, sample, feature_names
+                model, scaler, sample, feature_names, threshold=optimal_threshold
             )
-            explain_prediction(prediction_proba, prediction_class)
+            explain_prediction(prediction_proba, prediction_class, threshold=optimal_threshold)
 
         elif choice == '3':
             print("\nAll feature names:")
@@ -177,7 +226,7 @@ def test_with_custom_dict():
     print("EXAMPLE: Testing with custom dictionary")
     print("="*60)
 
-    model, scaler = load_model_and_scaler()
+    model, scaler, optimal_threshold = load_model_and_scaler()
     feature_names = get_feature_names()
 
     custom_input = create_sample_input()
@@ -195,9 +244,9 @@ def test_with_custom_dict():
     print_input_summary(custom_input)
 
     prediction_proba, prediction_class = predict_from_dict(
-        model, scaler, custom_input, feature_names
+        model, scaler, custom_input, feature_names, threshold=optimal_threshold
     )
-    explain_prediction(prediction_proba, prediction_class)
+    explain_prediction(prediction_proba, prediction_class, threshold=optimal_threshold)
 
 
 if __name__ == "__main__":
