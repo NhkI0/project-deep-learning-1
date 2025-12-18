@@ -9,10 +9,13 @@ import os
 
 
 def load_and_prepare_data(csv_path='../../data/CVD_cleaned_dummies.csv'):
+    """Load and prepare data for Height and Weight regression."""
     df = pd.read_csv(csv_path)
 
+    # Target variables
     y = df[['Height_(cm)', 'Weight_(kg)']].values
 
+    # Features (everything except the targets)
     X = df.drop(['Height_(cm)', 'Weight_(kg)'], axis=1).values
     feature_names = df.drop(['Height_(cm)', 'Weight_(kg)'], axis=1).columns.tolist()
     target_names = ['Height_(cm)', 'Weight_(kg)']
@@ -20,16 +23,17 @@ def load_and_prepare_data(csv_path='../../data/CVD_cleaned_dummies.csv'):
     return X, y, feature_names, target_names
 
 
-def create_mlp_regressor(input_dim, random_state=42):
+def create_mlp_regressor(input_dim, output_dim=2, random_state=42):
+    """Create an improved multi-output regression model matching TensorFlow architecture."""
     model = MLPRegressor(
-        hidden_layer_sizes=(128, 64, 32, 16),
+        hidden_layer_sizes=(256, 128, 64, 32, 16),
         activation='relu',
         solver='adam',
         learning_rate_init=0.001,
-        max_iter=100,
+        max_iter=300,
         early_stopping=True,
         validation_fraction=0.15,
-        n_iter_no_change=15,
+        n_iter_no_change=20,
         random_state=random_state,
         verbose=True
     )
@@ -42,8 +46,10 @@ def train_model(model, X_train, y_train):
     return model
 
 
-def evaluate_model(model, X_test, y_test, target_names, model_name="Model"):
-    y_pred = model.predict(X_test)
+def evaluate_model(model, X_test, y_test, target_names, y_pred=None, model_name="Model"):
+    """Evaluate the trained model."""
+    if y_pred is None:
+        y_pred = model.predict(X_test)
 
     print("\n" + "="*50)
     print(f"MODEL EVALUATION - {model_name}")
@@ -64,6 +70,7 @@ def evaluate_model(model, X_test, y_test, target_names, model_name="Model"):
         print(f"  MAE: {mae:.4f}")
         print(f"  R² Score: {r2:.4f}")
 
+    # Overall metrics
     overall_mse = mean_squared_error(y_test, y_pred)
     overall_mae = mean_absolute_error(y_test, y_pred)
 
@@ -75,7 +82,12 @@ def evaluate_model(model, X_test, y_test, target_names, model_name="Model"):
 
 
 def main():
-    print("Loading data...")
+    """Main training pipeline."""
+    print("="*60)
+    print("HEIGHT & WEIGHT REGRESSION - Scikit-learn")
+    print("="*60)
+
+    print("\nLoading data...")
     X, y, feature_names, target_names = load_and_prepare_data()
 
     print(f"Dataset shape: {X.shape}")
@@ -85,6 +97,7 @@ def main():
     for i, name in enumerate(target_names):
         print(f"  {name}: mean={y[:, i].mean():.2f}, std={y[:, i].std():.2f}")
 
+    # Split data
     X_train, X_temp, y_train, y_temp = train_test_split(
         X, y, test_size=0.3, random_state=42
     )
@@ -92,11 +105,15 @@ def main():
         X_temp, y_temp, test_size=0.5, random_state=42
     )
 
+    # Standardize features
+    print("\nStandardizing features...")
     scaler_X = StandardScaler()
     X_train = scaler_X.fit_transform(X_train)
     X_val = scaler_X.transform(X_val)
     X_test = scaler_X.transform(X_test)
 
+    # Standardize targets
+    print("Standardizing targets...")
     scaler_y = StandardScaler()
     y_train = scaler_y.fit_transform(y_train)
     y_val = scaler_y.transform(y_val)
@@ -106,28 +123,48 @@ def main():
     print(f"Validation set: {X_val.shape}")
     print(f"Test set: {X_test.shape}")
 
-    print("\nCreating MLPRegressor (Neural Network)...")
-    model = create_mlp_regressor(input_dim=X_train.shape[1])
+    # Create model
+    print("\nCreating model...")
+    print("Architecture: 256 -> 128 -> 64 -> 32 -> 16")
+    model = create_mlp_regressor(input_dim=X_train.shape[1], output_dim=2)
+
+    # Train model
     model = train_model(model, X_train, y_train)
 
+    # Evaluate model (inverse transform predictions for interpretability)
     print("\nEvaluating model on test set...")
     y_pred_scaled = model.predict(X_test)
     y_pred = scaler_y.inverse_transform(y_pred_scaled)
 
-    evaluate_model(model, X_test, y_test, target_names, "MLPRegressor")
+    # Use original scale for evaluation
+    evaluate_model(model, X_test, y_test, target_names, y_pred=y_pred, model_name="MLPRegressor")
+
+    # Save model
+    print("\n" + "="*60)
+    print("SAVING MODEL AND ARTIFACTS")
+    print("="*60)
 
     os.makedirs('saved_models', exist_ok=True)
+
     model_path = 'saved_models/height_weight_regression_sklearn.pkl'
+    joblib.dump(model, model_path)
+    print(f"✓ Model saved to {model_path}")
+
     scaler_X_path = 'saved_models/height_weight_scaler_X_sklearn.pkl'
     scaler_y_path = 'saved_models/height_weight_scaler_y_sklearn.pkl'
-
-    joblib.dump(model, model_path)
-    print(f"\nModel saved to {model_path}")
-
     joblib.dump(scaler_X, scaler_X_path)
     joblib.dump(scaler_y, scaler_y_path)
-    print(f"Feature scaler saved to {scaler_X_path}")
-    print(f"Target scaler saved to {scaler_y_path}")
+    print(f"✓ Feature scaler saved to {scaler_X_path}")
+    print(f"✓ Target scaler saved to {scaler_y_path}")
+
+    print("\n" + "="*60)
+    print("TRAINING COMPLETE")
+    print("="*60)
+    print(f"\nConfiguration (matching TensorFlow/Keras):")
+    print(f"  - Architecture: 256 -> 128 -> 64 -> 32 -> 16")
+    print(f"  - Learning rate: 0.001")
+    print(f"  - Activation: ReLU")
+    print(f"  - Early stopping: enabled")
 
     return model, scaler_X, scaler_y
 
