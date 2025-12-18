@@ -115,7 +115,7 @@ def evaluate_best_model(search, X_test, y_test):
     return best_model, best_params
 
 
-def compare_top_models(search, X_test, y_test, top_n=5):
+def compare_top_models(search, X_test, top_n=5):
     print("\n" + "="*60)
     print(f"COMPARING TOP {top_n} MODELS")
     print("="*60)
@@ -130,16 +130,8 @@ def compare_top_models(search, X_test, y_test, top_n=5):
         cv_score = cv_results.iloc[i]['mean_test_score']
 
         model = search.estimator.set_params(**params)
-        model.fit(search.best_estimator_.n_features_in_ if hasattr(search.best_estimator_, 'n_features_in_') else X_test.shape[1])
-
-        try:
-            y_pred_proba = search.estimator.set_params(**params).fit(
-                X_test if i == 0 else search.cv_results_['params'][0],
-                y_test if i == 0 else y_test
-            ).predict_proba(X_test)[:, 1]
-            y_pred = search.estimator.set_params(**params).predict(X_test)
-        except:
-            continue
+        model.fit(search.best_estimator_.n_features_in_ if hasattr(search.best_estimator_, 'n_features_in_')
+                  else X_test.shape[1])
 
         results.append({
             'rank': i + 1,

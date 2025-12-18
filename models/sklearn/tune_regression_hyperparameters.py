@@ -171,7 +171,6 @@ def main():
 
     scaler_y = StandardScaler()
     y_train = scaler_y.fit_transform(y_train)
-    y_val = scaler_y.transform(y_val)
     y_test = scaler_y.transform(y_test)
 
     print(f"\nTraining set: {X_train.shape}")

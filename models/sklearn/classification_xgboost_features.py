@@ -13,7 +13,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, roc_auc_score, recall_score, precision_score
+from sklearn.metrics import (classification_report, confusion_matrix, accuracy_score,
+                             roc_auc_score, recall_score, precision_score)
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import TomekLinks
 import joblib
@@ -188,7 +189,7 @@ def load_and_prepare_data(csv_path='../../data/CVD_cleaned.csv'):
     return X, y, feature_names
 
 
-def create_mlp_classifier(input_dim, random_state=42):
+def create_mlp_classifier(random_state=42):
     """
     Create MLPClassifier with architecture matching TensorFlow version.
     Architecture: 256 -> 128 -> 64 with aggressive regularization.
@@ -304,17 +305,20 @@ def main():
 
     # Apply SMOTE (oversample minority) + TomekLinks (undersample majority)
     print("\nApplying hybrid resampling: SMOTE + TomekLinks...")
-    print(f"Before resampling - Training: {X_train_scaled.shape}, Positive: {y_train.sum()} ({y_train.mean()*100:.1f}%)")
+    print(f"Before resampling - Training: {X_train_scaled.shape}, "
+          f"Positive: {y_train.sum()} ({y_train.mean()*100:.1f}%)")
 
     # SMOTE: oversample minority class
     smote = SMOTE(sampling_strategy='minority', random_state=42)
     X_train_smote, y_train_smote = smote.fit_resample(X_train_scaled, y_train)
-    print(f"After SMOTE - Training: {X_train_smote.shape}, Positive: {y_train_smote.sum()} ({y_train_smote.mean()*100:.1f}%)")
+    print(f"After SMOTE - Training: {X_train_smote.shape}, "
+          f"Positive: {y_train_smote.sum()} ({y_train_smote.mean()*100:.1f}%)")
 
     # TomekLinks: clean borders by removing majority class samples
     tomek = TomekLinks(sampling_strategy='majority')
     X_train_resampled, y_train_resampled = tomek.fit_resample(X_train_smote, y_train_smote)
-    print(f"After TomekLinks - Training: {X_train_resampled.shape}, Positive: {y_train_resampled.sum()} ({y_train_resampled.mean()*100:.1f}%)")
+    print(f"After TomekLinks - Training: {X_train_resampled.shape}, "
+          f"Positive: {y_train_resampled.sum()} ({y_train_resampled.mean()*100:.1f}%)")
 
     print(f"\n⚠️  Validation and test sets remain untouched")
     print(f"\nFinal dataset sizes:")
@@ -325,7 +329,7 @@ def main():
     # Create model
     print("\nCreating model...")
     print("Architecture: 256 -> 128 -> 64 (L2=1e-4)")
-    model = create_mlp_classifier(input_dim=X_train_resampled.shape[1])
+    model = create_mlp_classifier()
 
     # Train model
     model = train_model(model, X_train_resampled, y_train_resampled)

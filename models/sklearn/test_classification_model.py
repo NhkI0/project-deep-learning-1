@@ -28,15 +28,8 @@ def get_feature_names():
 def create_sample_input():
     feature_names = get_feature_names()
 
-    sample = {}
-
-    sample['Height_(cm)'] = 170.0
-    sample['Weight_(kg)'] = 70.0
-    sample['BMI'] = 24.22
-    sample['Alcohol_Consumption'] = 0.0
-    sample['Fruit_Consumption'] = 16.0
-    sample['Green_Vegetables_Consumption'] = 8.0
-    sample['FriedPotato_Consumption'] = 4.0
+    sample = {'Height_(cm)': 170.0, 'Weight_(kg)': 70.0, 'BMI': 24.22, 'Alcohol_Consumption': 0.0,
+              'Fruit_Consumption': 16.0, 'Green_Vegetables_Consumption': 8.0, 'FriedPotato_Consumption': 4.0}
 
     for feature in feature_names:
         if feature not in sample:
@@ -104,10 +97,15 @@ def interactive_mode():
                 height = float(input(f"Height (cm) [default: {sample['Height_(cm)']:.1f}]: ") or sample['Height_(cm)'])
                 weight = float(input(f"Weight (kg) [default: {sample['Weight_(kg)']:.1f}]: ") or sample['Weight_(kg)'])
                 bmi = float(input(f"BMI [default: {sample['BMI']:.2f}]: ") or sample['BMI'])
-                alcohol = float(input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ") or sample['Alcohol_Consumption'])
-                fruit = float(input(f"Fruit Consumption [default: {sample['Fruit_Consumption']:.1f}]: ") or sample['Fruit_Consumption'])
-                veggies = float(input(f"Green Vegetables Consumption [default: {sample['Green_Vegetables_Consumption']:.1f}]: ") or sample['Green_Vegetables_Consumption'])
-                potatoes = float(input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ") or sample['FriedPotato_Consumption'])
+                alcohol = float(input(f"Alcohol Consumption [default: {sample['Alcohol_Consumption']:.1f}]: ")
+                                or sample['Alcohol_Consumption'])
+                fruit = float(input(f"Fruit Consumption [default: {sample['Fruit_Consumption']:.1f}]: ")
+                              or sample['Fruit_Consumption'])
+                veggies = float(input(f"Green Vegetables Consumption [default: "
+                                      f"{sample['Green_Vegetables_Consumption']:.1f}]: ")
+                                or sample['Green_Vegetables_Consumption'])
+                potatoes = float(input(f"Fried Potato Consumption [default: {sample['FriedPotato_Consumption']:.1f}]: ")
+                                 or sample['FriedPotato_Consumption'])
 
                 sample['Height_(cm)'] = height
                 sample['Weight_(kg)'] = weight

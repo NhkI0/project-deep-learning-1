@@ -23,7 +23,7 @@ def load_and_prepare_data(csv_path='../../data/CVD_cleaned_dummies.csv'):
     return X, y, feature_names, target_names
 
 
-def create_mlp_regressor(input_dim, output_dim=2, random_state=42):
+def create_mlp_regressor(random_state=42):
     """Create an improved multi-output regression model matching TensorFlow architecture."""
     model = MLPRegressor(
         hidden_layer_sizes=(256, 128, 64, 32, 16),
@@ -116,8 +116,6 @@ def main():
     print("Standardizing targets...")
     scaler_y = StandardScaler()
     y_train = scaler_y.fit_transform(y_train)
-    y_val = scaler_y.transform(y_val)
-    y_test_scaled = scaler_y.transform(y_test)
 
     print(f"\nTraining set: {X_train.shape}")
     print(f"Validation set: {X_val.shape}")
@@ -126,7 +124,7 @@ def main():
     # Create model
     print("\nCreating model...")
     print("Architecture: 256 -> 128 -> 64 -> 32 -> 16")
-    model = create_mlp_regressor(input_dim=X_train.shape[1], output_dim=2)
+    model = create_mlp_regressor()
 
     # Train model
     model = train_model(model, X_train, y_train)
