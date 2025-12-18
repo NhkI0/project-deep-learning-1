@@ -7,7 +7,7 @@ import os
 
 
 def load_model_and_scalers():
-    model_path = 'saved_models/height_weight_regression'
+    model_path = 'saved_models/height_weight_regression.keras'
     scaler_X_path = 'saved_models/height_weight_scaler_X.pkl'
     scaler_y_path = 'saved_models/height_weight_scaler_y.pkl'
 

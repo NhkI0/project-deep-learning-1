@@ -24,17 +24,41 @@ def load_and_prepare_data(csv_path='../../data/CVD_cleaned_dummies.csv'):
 
 
 def create_multioutput_regression_model(input_dim, output_dim=2):
-    """Create a multi-output regression model for Height and Weight prediction."""
+    """Create an improved multi-output regression model with BatchNorm and better architecture."""
     model = keras.Sequential([
         keras.layers.Input(shape=(input_dim,)),
-        keras.layers.Dense(128, activation='relu'),
+
+        # First block
+        keras.layers.Dense(256, kernel_initializer='he_normal'),
+        keras.layers.BatchNormalization(),
+        keras.layers.Activation('relu'),
         keras.layers.Dropout(0.3),
-        keras.layers.Dense(64, activation='relu'),
+
+        # Second block
+        keras.layers.Dense(128, kernel_initializer='he_normal'),
+        keras.layers.BatchNormalization(),
+        keras.layers.Activation('relu'),
         keras.layers.Dropout(0.3),
-        keras.layers.Dense(32, activation='relu'),
+
+        # Third block
+        keras.layers.Dense(64, kernel_initializer='he_normal'),
+        keras.layers.BatchNormalization(),
+        keras.layers.Activation('relu'),
         keras.layers.Dropout(0.2),
-        keras.layers.Dense(16, activation='relu'),
-        keras.layers.Dense(output_dim)
+
+        # Fourth block
+        keras.layers.Dense(32, kernel_initializer='he_normal'),
+        keras.layers.BatchNormalization(),
+        keras.layers.Activation('relu'),
+        keras.layers.Dropout(0.2),
+
+        # Fifth block
+        keras.layers.Dense(16, kernel_initializer='he_normal'),
+        keras.layers.BatchNormalization(),
+        keras.layers.Activation('relu'),
+
+        # Output layer
+        keras.layers.Dense(output_dim, kernel_initializer='glorot_normal')
     ])
 
     model.compile(
@@ -46,19 +70,26 @@ def create_multioutput_regression_model(input_dim, output_dim=2):
     return model
 
 
-def train_model(model, X_train, y_train, X_val, y_val, epochs=100, batch_size=32):
-    """Train the multi-output regression model."""
+def train_model(model, X_train, y_train, X_val, y_val, epochs=200, batch_size=32):
+    """Train the multi-output regression model with improved callbacks."""
     early_stopping = keras.callbacks.EarlyStopping(
         monitor='val_loss',
-        patience=15,
-        restore_best_weights=True
+        patience=20,
+        restore_best_weights=True,
+        verbose=1
     )
 
     reduce_lr = keras.callbacks.ReduceLROnPlateau(
         monitor='val_loss',
         factor=0.5,
-        patience=5,
-        min_lr=1e-7
+        patience=8,
+        min_lr=1e-7,
+        verbose=1
+    )
+
+    # Cosine annealing for learning rate
+    cosine_decay = keras.callbacks.LearningRateScheduler(
+        lambda epoch: 0.001 * (np.cos(epoch * np.pi / epochs) + 1) / 2 + 1e-7
     )
 
     history = model.fit(
@@ -73,9 +104,10 @@ def train_model(model, X_train, y_train, X_val, y_val, epochs=100, batch_size=32
     return history
 
 
-def evaluate_model(model, X_test, y_test, target_names):
+def evaluate_model(model, X_test, y_test, target_names, y_pred=None):
     """Evaluate the trained model."""
-    y_pred = model.predict(X_test)
+    if y_pred is None:
+        y_pred = model.predict(X_test)
 
     print("\n" + "="*50)
     print("MODEL EVALUATION - Height & Weight Regression")
@@ -150,7 +182,7 @@ def main():
 
     # Train model
     print("\nTraining model...")
-    history = train_model(model, X_train, y_train, X_val, y_val, epochs=100, batch_size=32)
+    history = train_model(model, X_train, y_train, X_val, y_val, epochs=200, batch_size=32)
 
     # Evaluate model (inverse transform predictions for interpretability)
     print("\nEvaluating model on test set...")
@@ -158,16 +190,10 @@ def main():
     y_pred = scaler_y.inverse_transform(y_pred_scaled)
 
     # Use original scale for evaluation
-    temp_model_output = y_pred
-    evaluate_model(
-        lambda x: temp_model_output if x is X_test else model.predict(x),
-        X_test,
-        y_test,
-        target_names
-    )
+    evaluate_model(model, X_test, y_test, target_names, y_pred=y_pred)
 
     # Save model
-    model_path = 'saved_models/height_weight_regression'
+    model_path = 'saved_models/height_weight_regression.keras'
     os.makedirs('saved_models', exist_ok=True)
     model.save(model_path)
     print(f"\nModel saved to {model_path}")
