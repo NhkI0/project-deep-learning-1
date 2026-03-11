@@ -12,3 +12,4 @@ pillow
 PyYAML
 sympy
 streamlit
+tensorflow
