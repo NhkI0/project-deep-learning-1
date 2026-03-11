@@ -133,8 +133,8 @@ def display_classification():
     diabetes_field = st.selectbox("Do you have any diabetes?", ("No",
                                                                 "No, pre-diabetes or borderline diabetes",
                                                                 "Yes",
-                                                                f"{"Yes, but female told only during pregnancy" if (
-                                                                        gender_field == "Female") else ""}",
+                                                                "Yes, but female told only during pregnancy" if (
+                                                                        gender_field == "Female") else "",
                                                                 ))
 
     smoking_field = st.selectbox("Have you ever been a regular smoker at any point of your life?", ("Yes", "No"))
